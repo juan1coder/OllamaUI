@@ -1,0 +1,28 @@
+#function to launch the OllamaUI. this goes inside your .bashrc file, use if needed or want to do so. 
+pyserve_here() {
+  local host="127.0.0.1"
+  local port=$(shuf -i 8000-8999 -n 1)
+
+  while lsof -i TCP:$port &>/dev/null; do
+    port=$(shuf -i 8000-8999 -n 1)
+  done
+
+  echo "🔒 Serving on http://$host:$port (local only)"
+  echo "🧠 Directory: $(pwd)"
+  echo "📂 UFW Status:"
+  
+
+  # Start server in background
+  python3 -m http.server "$port" --bind "$host" &
+
+  # Save PID to kill later if needed
+  echo $! > /tmp/serve_here.pid
+
+  # Open in browser (optional)
+  if command -v xdg-open &> /dev/null; then
+    xdg-open "http://$host:$port"
+  elif command -v open &> /dev/null; then
+    open "http://$host:$port"
+  fi
+}
+#save and source. you will also need to ad rules to your firewall if using any, set a range from 8000 to 8999 - keep the server runing locally for those of us that are extra paranoid. 
